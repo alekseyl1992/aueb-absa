@@ -1,5 +1,6 @@
 numpy
-ad3
+# ad3 with fixes for Windows:
+https://github.com/andre-martins/AD3/archive/master.zip
 atlas
 decorator 
 boto
@@ -13,6 +14,7 @@ path.py
 pexpect
 ptyprocess
 pyparsing
+pystruct
 python-dateutil
 pytz
 requests
