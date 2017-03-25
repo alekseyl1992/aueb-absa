@@ -6,7 +6,7 @@
 import xml.etree.ElementTree as ET
 import numpy as np
 from numpy import linalg as la
-from sklearn import linear_model
+from sklearn import linear_model, neural_network
 from nltk import word_tokenize
 
 
@@ -75,11 +75,12 @@ class features():
                                 break
                         if flag:
                             # ---------- use the helpingEmbeddings.txt instead of the embeddings model ----------
-                            # if word in model.vocab: #we have an embedding of the word #UNCOMMENT TO USE EMBEDDINGS MODEL
+                            # if word in model.vocab:
+                            # we have an embedding of the word #UNCOMMENT TO USE EMBEDDINGS MODEL
                             # idf from amazon corpus
                             if word in self.dictionary:
                                 # use only the usefull (based on IDF) words to create the centroid
-                                if self.dictionary[word] < 0.5:
+                                if self.dictionary[word] > 20:
                                     usefull = False
                                 else:
                                     idf.append(self.dictionary[word])  # getting the idf of the word
@@ -134,15 +135,16 @@ class features():
                     opinions = sentence[1]  # getting the opinions field
                     if len(opinions) > 0:  # check if there are aspects
                         t = sentence[0].text  # getting the text
-                        text = word_tokenize(t.lower())  # tokenize, convert to lower case
 
                         for opinion in opinions:
-                            category = opinion.attrib['polarity']
-                            train_tags.append(category)  # store the category
+                            tokens = self.tokenize(t, opinion.attrib['category'])
 
-                            train_emb.append(text)  # store the tokenized words for the embedding's calculation
+                            polarity = opinion.attrib['polarity']
+                            train_tags.append(polarity)
 
-        centroid = self.calcCentroid(self.model, train_emb)  # caclulate the centroid for each sentence
+                            train_emb.append(tokens)  # store the tokenized words for the embedding's calculation
+
+        centroid = self.calcCentroid(self.model, train_emb)  # calculate the centroid for each sentence
 
         for i in range(len(centroid)):  # join the matrices
             tmp = centroid[i].tolist()
@@ -166,12 +168,9 @@ class features():
 
                     if len(opinions) > 0:  # check if there are aspects
                         t = sentence[0].text
-
-                        text = word_tokenize(t.lower())
-                        textC = word_tokenize(t)  # tokenize, check for caps
-
                         for opinion in opinions:
-                            test_emb.append(text)  # store the tokenized words for the embedding's calculation
+                            tokens = self.tokenize(t, opinion.attrib['category'])
+                            test_emb.append(tokens)  # store the tokenized words for the embedding's calculation
 
         centroid = self.calcCentroid(self.model, test_emb)  # caclulate the centroid for each sentence
 
@@ -185,7 +184,17 @@ class features():
         return test_vector
 
     def results(self, train_vector, train_tags, test_vector):
-        logistic = linear_model.LogisticRegression(C=1.5)  # fit logistic
+        # logistic = linear_model.LogisticRegression(C=1.5)  # fit logistic
+        logistic = neural_network.MLPClassifier(hidden_layer_sizes=(10,))
+
         logistic.fit(train_vector, train_tags)
         resLogistic = logistic.predict_proba(test_vector)
         return resLogistic
+
+    def category_as_text(self, cat):
+        return cat.replace('#', ' ').replace('_', ' ')
+
+    def tokenize(self, text, cat):
+        text += (' ' + self.category_as_text(cat)) * 3
+        tokens = word_tokenize(text.lower())
+        return tokens

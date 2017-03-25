@@ -43,13 +43,17 @@ predictionsLap2 = absa2016_embeddings.features.results(fea2, train_vector, train
 print 'End Embeddings Model'
 
 # both methods "vote"
-l = len(predictionsLap1)
+l = len(predictionsLap2)
 predictionsLap = []
 w1, w2 = 0.5, 0.5
 for i in range(l):
     negative = float(predictionsLap1[i][0] * w1 + predictionsLap2[i][0] * w2) / 2  # number of the methods we are using
     neutral = float(predictionsLap1[i][1] * w1 + predictionsLap2[i][1] * w2) / 2
     positive = float(predictionsLap1[i][2] * w1 + predictionsLap2[i][2] * w2) / 2
+
+    # negative = float(predictionsLap2[i][0])
+    # neutral = float(predictionsLap2[i][1])
+    # positive = float(predictionsLap2[i][2])
 
     if negative > neutral and negative > positive:
         predictionsLap.append('negative')  # check the probabilities
