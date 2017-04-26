@@ -2,6 +2,8 @@
 
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
+import pickle
 
 import numpy as np
 import codecs
@@ -22,6 +24,13 @@ def load_helping_embeddings():
                      dtype=np.dtype('S32, 200f8'))
     return csv
 
+
+def save_features(data, path):
+    cwd = os.path.dirname(os.path.realpath(__file__))
+    pickle_path = os.path.join(cwd, path + '.pickle')
+    pickle.dump(data, open(pickle_path, 'wb'))
+
+
 helping_embeddings = load_helping_embeddings()
 
 train_path = 'restaurants/ABSA16_Restaurants_Train_SB1_v2.xml'
@@ -32,6 +41,13 @@ print('-------- Features Model--------')
 fea2 = absa2016_lexicons.features(train_path, test_path, domain)
 train_vector, train_tags = absa2016_lexicons.features.train(fea2, domain)
 test_vector = absa2016_lexicons.features.test(fea2, domain)
+
+just_save_features = True
+if just_save_features:
+    save_features(train_vector, 'hand-features-train')
+    save_features(test_vector, 'hand-features-test')
+    exit(0)
+
 predictions1 = absa2016_lexicons.features.results(fea2, train_vector, train_tags, test_vector, domain)
 print 'End Features Model'
 
