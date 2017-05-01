@@ -75,7 +75,8 @@ def extract_subjectives(filename, new_filename):
                 o.write('\t\t<sentences>\n')
                 for sentence in sentences.findall('sentence'):
                     if (sentence.get('OutOfScope') != "TRUE"):
-                        if sentence.find('Opinions') != None:
+                        opinions = sentence.find('Opinions')
+                        if opinions and len(opinions) != 0:
                             o.write('\t\t\t<sentence id="%s">\n' % (sentence.get('id')))
                             o.write('\t\t\t\t<text>%s</text>\n' % (fix(sentence.find('text').text)))
                             for opinions in sentence.findall('Opinions'):
@@ -907,7 +908,7 @@ def main(argv=None):
     trainfile_ = 'train_subjectives.xml'
     testfile_ = 'test_subjectives.xml'
     extract_subjectives(trainfile, trainfile_)
-    leave_outOfScope(testfile, testfile_)
+    extract_subjectives(testfile, testfile_)
     print('Done!')
 
     # Get the corpus and split into train/test.
